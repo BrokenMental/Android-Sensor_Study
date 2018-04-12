@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.inhatc.jinuk.sensor.MainActivity">
+
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:id="@+id/LinearLayout_Gravity">
+
+        <TextView
+            android:text="Gravity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtTitle_Gravity"
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:textStyle="normal|bold"
+            android:background="?attr/colorControlHighlight"/>
+
+        <TextView
+            android:text="X: "
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtX_Gravity"/>
+
+        <TextView
+            android:text="Y: "
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtY_Gravity"/>
+
+        <TextView
+            android:text="Z: "
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtZ_Gravity"/>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:id="@+id/LinearLayout_Accelerometer"
+        android:layout_marginTop="39dp"
+        android:layout_below="@+id/LinearLayout_Gravity">
+
+        <TextView
+            android:text="Accelerometer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtTitle_Accelerometer"
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:textStyle="normal|bold"
+            android:background="@android:color/holo_orange_light"/>
+
+        <TextView
+            android:text="X: "
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtX_Accelerometer"/>
+
+        <TextView
+            android:text="Y: "
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtY_Accelerometer"/>
+
+        <TextView
+            android:text="Z: "
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtZ_Accelerometer"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:id="@+id/LinearLayout_LinearAccelerometer"
+        android:layout_marginTop="46dp"
+        android:layout_below="@+id/LinearLayout_Accelerometer">
+
+        <TextView
+            android:text="Linear Accelerometer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtTitle_LinearAccelerometer"
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:textStyle="normal|bold"
+            android:background="@android:color/holo_orange_dark"/>
+
+        <TextView
+            android:text="X: "
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtX_LinearAcceleration"/>
+
+        <TextView
+            android:text="Y: "
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtY_LinearAcceleration"/>
+
+        <TextView
+            android:text="Z: "
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtZ_LinearAcceleration"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:id="@+id/LinearLayout_Gyroscope"
+        android:layout_marginTop="50dp"
+        android:layout_below="@+id/LinearLayout_LinearAccelerometer">
+
+        <TextView
+            android:text="Gyroscope"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtTitle_Gyroscope"
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:textStyle="normal|bold"
+            android:background="@android:color/holo_green_light"/>
+
+        <TextView
+            android:text="X: "
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtX_Gyroscope"/>
+
+        <TextView
+            android:text="Y: "
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtY_Gyroscope"/>
+
+        <TextView
+            android:text="Z: "
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtZ_Gyroscope"/>
+    </LinearLayout>
+</RelativeLayout>
