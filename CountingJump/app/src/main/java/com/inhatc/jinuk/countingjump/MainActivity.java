@@ -19,8 +19,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         num = 0;
 
+        sensor_Accelerometer = objSMG.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         objTV_Y_Accelerometer = (TextView) findViewById(R.id.CountingNumber);
         }
     @Override
