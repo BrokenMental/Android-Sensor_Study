@@ -5,32 +5,47 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import net.daum.mf.map.api.MapView;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import static android.hardware.Sensor.TYPE_ACCELEROMETER;
 import static com.kakao.util.maps.helper.Utility.getPackageInfo;
 
-public class KakaoMapViewer extends AppCompatActivity {
+public class KakaoMapViewer extends AppCompatActivity implements SensorEventListener {
 
-    public  final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1;
+    public final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1;
+    public static valueVO vo;
 
     @Override
     protected void onCreate(Bundle saveInstanceState){
         super.onCreate(saveInstanceState);
-        setContentView(R.layout.kakaomapviewer);
+        setContentView(R.layout.view_main);
+
+        vo = new valueVO();
 
         MapView mapView = new MapView(this);
         mapView.setDaumMapApiKey("ad85475be6af5302b83e3ef713460b83");
         ViewGroup mapViewContainer = (ViewGroup) findViewById(R.id.map_view);
         mapViewContainer.addView(mapView);
+
+        vo.setObjSMG((SensorManager)getSystemService(SENSOR_SERVICE));
+        vo.setSensor_Accelerometer(vo.getObjSMG().getDefaultSensor(TYPE_ACCELEROMETER));
+
+        vo.setWalkCount((TextView)findViewById(R.id.walkCount));
+        vo.setWalkData(new WalkData(this));
 
         // Assume thisActivity is the current activity
         int permissionCheck = ContextCompat.checkSelfPermission(this,
@@ -106,4 +121,14 @@ public class KakaoMapViewer extends AppCompatActivity {
         return null;
     }
 
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        WalkingViewer walkC = new WalkingViewer();
+        walkC.walkCounting(event);
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
 }
