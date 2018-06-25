@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
         objTV = (TextView) findViewById(R.id.txtTitle);
 
-        strServiceUrl = "http://ws.bus.go.kr/api/rest/busRouteInfo/getRouteInfo";
+        strServiceUrl = "http://ws.bus.go.kr/api/rest/busRouteInfo/getBusRouteList";
         strServiceKey = "u9fo42I2R0K%2Fsc4Y81Kag3%2Fba%2BJXZQo%2FO213Nf45OSVJ7Rl8m2Lb9RQTjdVt4EUoBHlUE1NbxofSNHzYwjeIqg%3D%3D";
         strRouteId = "100100063";
         strUrl = strServiceUrl + "?serviceKey=" + strServiceKey + "&busRouteId" + strRouteId;
