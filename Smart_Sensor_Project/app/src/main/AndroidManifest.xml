@@ -17,7 +17,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="cs.inhatc.sensor.smart_sensor_project.KakaoMapViewer">
+        <activity android:name=".KakaoMapViewer">
+        </activity>
+        <activity android:name=".WalkingViewer">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

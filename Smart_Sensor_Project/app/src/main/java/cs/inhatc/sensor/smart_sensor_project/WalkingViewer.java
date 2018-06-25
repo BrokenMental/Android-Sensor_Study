@@ -1,6 +1,7 @@
 package cs.inhatc.sensor.smart_sensor_project;
 
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -23,6 +24,7 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
@@ -30,46 +32,99 @@ import static android.hardware.Sensor.TYPE_ACCELEROMETER;
 import static cs.inhatc.sensor.smart_sensor_project.KakaoMapViewer.vo;
 
 public class WalkingViewer extends AppCompatActivity implements SensorEventListener{
+    private SensorManager objSMG;
+    private Sensor sensor_Accelerometer;
+
+    private long lastTime;
+    private float speed;
+    private float lastX;
+    private float lastY;
+    private float lastZ;
+
+    private BarChart barChart;
+    private int chartLine;
+
+    //그래프 그리기 위한 ArrayList
+    ArrayList<BarEntry> entries = new ArrayList<>();
+    ArrayList<String> labels = new ArrayList<String>();
+
+    //뒤로가기 버튼 Delay
+    private final long FINISH_INTERVAL_TIME = 2000;
+    private long backPressedTime = 0;
+
+    //가속도 센서 Delay
+    private static final int SHAKE_THRESHOLD = 800;
+
+    WalkData walkData;
+    SQLiteDatabase sql;
+
+    TextView walkCount;
+
+    int moveCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.view_walking);
 
+        objSMG = (SensorManager)getSystemService(SENSOR_SERVICE);
+        sensor_Accelerometer = objSMG.getDefaultSensor(TYPE_ACCELEROMETER);
+
+        walkCount = (TextView)findViewById(R.id.walkCount);
+        barChart = (BarChart)findViewById(R.id.chart);
+
+        walkData = new WalkData(this);
+
         SimpleDateFormat fm1 = new SimpleDateFormat("yyyy-MM-dd");
         String date = fm1.format(new Date());
 
-        vo.setBarChart((BarChart)findViewById(R.id.chart));
+        sql = walkData.getWritableDatabase();
 
-        vo.setObjSMG((SensorManager)getSystemService(SENSOR_SERVICE));
-        vo.setSensor_Accelerometer(vo.getObjSMG().getDefaultSensor(TYPE_ACCELEROMETER));
-        walkSelect(date);
+        Cursor cursor;
+        cursor = sql.rawQuery("SELECT * FROM WalkHistory ORDER BY WalkHistory._id DESC Limit 7;", null);
 
-        BarDataSet barDataSet = new BarDataSet(vo.getEntries(), null);
+
+        while (cursor.moveToNext())
+        {
+            entries.add(new BarEntry(chartLine, cursor.getInt(1)));
+            labels.add(cursor.getString(2));
+            chartLine++;
+
+            if(date.matches(cursor.getString(2)))
+            {
+                walkCount.setText("" + cursor.getString(1));
+                moveCount = Integer.parseInt(cursor.getString(1));
+            }
+        }
+
+        cursor.close();
+        sql.close();
+
+        BarDataSet barDataSet = new BarDataSet(entries, null);
         barDataSet.setDrawValues(false);
         barDataSet.setColors(ColorTemplate.VORDIPLOM_COLORS);
         barDataSet.setDrawValues(!barDataSet.isDrawValuesEnabled());
         barDataSet.setValueTextSize(15);
 
         BarData barData = new BarData(barDataSet);
-        vo.getBarChart().setData(barData);
-        vo.getBarChart().setFitBars(true);
-        vo.getBarChart().getLegend().setEnabled(false);
+        barChart.setData(barData);
+        barChart.setFitBars(true);
+        barChart.getLegend().setEnabled(false);
 
-        XAxis xAxis = vo.getBarChart().getXAxis();
+        XAxis xAxis = barChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setDrawGridLines(false);
         xAxis.setTextSize(14);
         xAxis.setGranularity(1f);
-        xAxis.setValueFormatter(new IndexAxisValueFormatter(vo.getLabels()));
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
 
-        YAxis yLAxis = vo.getBarChart().getAxisLeft();
+        YAxis yLAxis = barChart.getAxisLeft();
         yLAxis.setTextColor(Color.BLACK);
         yLAxis.setTextSize(14);
         yLAxis.setAxisMinimum(0f);
         yLAxis.setDrawGridLines(true);
 
-        YAxis yRAxis = vo.getBarChart().getAxisRight();
+        YAxis yRAxis = barChart.getAxisRight();
         yRAxis.setDrawLabels(false);
         yRAxis.setDrawAxisLine(false);
         yRAxis.setDrawGridLines(false);
@@ -78,79 +133,33 @@ public class WalkingViewer extends AppCompatActivity implements SensorEventListe
         Description description = new Description();
         description.setText("");
 
-        vo.getBarChart().setDoubleTapToZoomEnabled(false);
-        vo.getBarChart().setDrawGridBackground(false);
-        vo.getBarChart().setDescription(description);
-        vo.getBarChart().setNoDataText("걸음걸이 데이터가 없습니다.");
-        vo.getBarChart().setNoDataTextColor(Color.BLACK);
-        vo.getBarChart().animateY(2000, Easing.EasingOption.EaseInCubic);
-        vo.getBarChart().invalidate();
-    }
-
-    public void walkSelect(String date) {
-        vo.setWalkCount((TextView)findViewById(R.id.walkCount));
-        vo.setWalkData(new WalkData(this));
-
-        vo.setSql(vo.getWalkData().getWritableDatabase());
-
-        Cursor cursor;
-        cursor = vo.getSql().rawQuery("SELECT * FROM WalkHistory ORDER BY WalkHistory._id DESC Limit 7;", null);
-
-        while (cursor.moveToNext())
-        {
-            vo.getEntries().add(new BarEntry(vo.getChartLine(), cursor.getInt(1)));
-            vo.getLabels().add(cursor.getString(2));
-            vo.setChartLine(vo.getChartLine()+1);
-
-            if(date.matches(cursor.getString(2)))
-            {
-                vo.getWalkCount().setText("" + cursor.getString(1));
-                vo.setMoveCount(Integer.parseInt(cursor.getString(1)));
-            }
-        }
-
-        cursor.close();
-        vo.getSql().close();
-    }
-
-    public void walkCounting(SensorEvent event){
-        if (event.sensor.getType() == TYPE_ACCELEROMETER)
-        {
-            long currentTime = System.currentTimeMillis();
-            long gabOfTime = (currentTime - vo.getLastTime());
-            if (gabOfTime > 100) {
-                vo.setLastTime(currentTime);
-
-                vo.setSpeed(Math.abs(event.values[0] + event.values[1] + event.values[2] - vo.getLastX() - vo.getLastY() - vo.getLastZ()) / gabOfTime * 10000);
-
-                if (vo.getSpeed() > vo.getShakeThreshold()) {
-                    vo.setMoveCount(vo.getMoveCount()+1);
-                    vo.getWalkCount().setText(""+vo.getMoveCount());
-                }
-
-                vo.setLastX(event.values[0]);
-                vo.setLastY(event.values[1]);
-                vo.setLastZ(event.values[2]);
-            }
-        }
+        barChart.setDoubleTapToZoomEnabled(false);
+        barChart.setDrawGridBackground(false);
+        barChart.setDescription(description);
+        barChart.setNoDataText("걸음걸이 데이터가 없습니다.");
+        barChart.setNoDataTextColor(Color.BLACK);
+        barChart.animateY(2000, Easing.EasingOption.EaseInCubic);
+        barChart.invalidate();
     }
 
     @Override
     public void onBackPressed() {
         long tempTime = System.currentTimeMillis();
-        long intervalTime = tempTime - vo.getBackPressedTime();
+        long intervalTime = tempTime - backPressedTime;
 
-        if (0 <= intervalTime && vo.getFINISH_INTERVAL_TIME() >= intervalTime) {
+        if (0 <= intervalTime && FINISH_INTERVAL_TIME >= intervalTime) {
             super.onBackPressed();
 
             SimpleDateFormat fm1 = new SimpleDateFormat("yyyy-MM-dd",Locale.KOREA);
             String date = fm1.format(new Date());
-            vo.setSql(vo.getWalkData().getWritableDatabase());
-            vo.getSql().execSQL("INSERT INTO WalkHistory SELECT NULL,0,'"+date+"' WHERE NOT EXISTS(SELECT WalkHistory.Testdate FROM WalkHistory WHERE WalkHistory.Testdate='"+date+"');");
-            vo.getSql().execSQL("UPDATE WalkHistory SET walk_cnt="+Integer.parseInt(""+vo.getWalkCount().getText())+" WHERE WalkHistory.Testdate='"+date+"';");
-            vo.getSql().close();
+            sql = walkData.getWritableDatabase();
+            sql.execSQL("INSERT INTO WalkHistory SELECT NULL,0,'"+date+"' WHERE NOT EXISTS(SELECT WalkHistory.Testdate FROM WalkHistory WHERE WalkHistory.Testdate='"+date+"');");
+
+            sql.execSQL("UPDATE WalkHistory SET walk_cnt="+Integer.parseInt(""+walkCount.getText())+" WHERE WalkHistory.Testdate='"+date+"';");
+
+            sql.close();
         } else {
-            vo.setBackPressedTime(tempTime);
+            backPressedTime = tempTime;
             Toast.makeText(this, "뒤로 버튼을 한번 더 누르시면 종료됩니다.", Toast.LENGTH_SHORT).show();
         }
     }
@@ -159,18 +168,36 @@ public class WalkingViewer extends AppCompatActivity implements SensorEventListe
     protected void onResume() {
         super.onResume();
 
-        vo.getObjSMG().registerListener(this, vo.getSensor_Accelerometer(), SensorManager.SENSOR_DELAY_NORMAL);
+        objSMG.registerListener(this, sensor_Accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        vo.getObjSMG().unregisterListener(this);
+        objSMG.unregisterListener(this);
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        walkCounting(event);
+        if (event.sensor.getType() == TYPE_ACCELEROMETER)
+        {
+            long currentTime = System.currentTimeMillis();
+            long gabOfTime = (currentTime - lastTime);
+            if (gabOfTime > 100) {
+                lastTime = currentTime;
+
+                speed = Math.abs(event.values[0] + event.values[1] + event.values[2] - lastX - lastY - lastZ) / gabOfTime * 10000;
+
+                if (speed > SHAKE_THRESHOLD) {
+                    moveCount++;
+                    walkCount.setText(""+moveCount);
+                }
+
+                lastX = event.values[0];
+                lastY = event.values[1];
+                lastZ = event.values[2];
+            }
+        }
     }
 
     @Override
